@@ -1,0 +1,27 @@
+{
+  "name": "stars-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cosmo-lang/stars-api.git"
+  },
+  "keywords": [
+    "cosmo",
+    "stars",
+    "api",
+    "host",
+    "package",
+    "manager"
+  ],
+  "author": "R-unic",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cosmo-lang/stars-api/issues"
+  },
+  "homepage": "https://github.com/cosmo-lang/stars-api#readme"
+}
