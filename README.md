@@ -7,3 +7,6 @@ API for hosting Stars packages
 | `/api/packages`         | POST        | Upload a package         | -                                |
 | `/api/packages/:name`   | PUT         | Update a package         | -                                |
 | `/api/packages/:name`   | DELETE      | Remove a package         | -                                |
+
+## Todo
+- Authorization
