@@ -1,2 +1,2 @@
-# stars-api
+# Stars API
 API for hosting Stars packages
