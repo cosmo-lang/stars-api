@@ -51,6 +51,22 @@ router.post("/packages", async (req, res) => {
     res.status(503).json({ success: false, error: "Author already exists." });
 });
 
+router.delete("/packages", async (req, res) => {
+  const authorName = req.body.authorName.toLowerCase()
+  const author = await prisma.author.findFirst({
+    where: { name: authorName }
+  });
+
+  if (author != null) {
+    await prisma.author.delete({
+      where: { name: authorName }
+    });
+
+    res.json({ success: true });
+  } else
+    res.status(404).json({ success: false, error: "Author does not exist." });
+});
+
 router.get("/packages/:author/:name", async (req, res) => {
   try {
     const author = await prisma.author.findFirst({
@@ -102,6 +118,30 @@ router.post("/packages/:author",  async (req, res) => {
       res.json({ success: true });
     } else
       res.status(503).json({ success: false, error: "Package already exists." });
+  }
+});
+
+router.delete("/packages/:author", async (req, res) => {
+  const packageName = req.body.name
+  const author = await prisma.author.findFirst({
+    where: { name: req.params.author.toLowerCase() }
+  });
+
+  if (author == null)
+    res.status(404).json({ success: false, error: "Author does not exist." });
+  else {
+    const packageData = await prisma.package.findFirst({
+      where: { author: author }
+    });
+
+    if (packageData != null) {
+      await prisma.package.delete({
+        where: { name: packageName }
+      });
+
+      res.json({ success: true });
+    } else
+      res.status(503).json({ success: false, error: "Package does not exist." });
   }
 });
 
