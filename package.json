@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "nodemon --exec \"prisma generate && tsc && node dist/main.js\" --ext ts,prisma"
+    "dev": "nodemon --exec \"prisma generate && tsc && node dist/main.js || exit 1\" --ext ts,prisma"
   },
   "repository": {
     "type": "git",

@@ -1,10 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { errorBody } from "./util";
-import express from "express";
 import { PackageAlreadyExistsError, PackageService } from "./services/package-service";
+import { AuthorService } from "./services/author-service";
+import { assertBodyField, errorBody } from "./util";
+import express from "express";
 
 const prisma = new PrismaClient;
-const packages = new PackageService(prisma);
+const authors = new AuthorService(prisma);
+const packages = new PackageService(prisma, authors);
 const app = express();
 const port = 3030;
 
@@ -14,9 +16,8 @@ const router = express.Router();
 // Fetch author
 router.get("/packages/:author", async (req, res) => {
   try {
-    const author = await prisma.author.findFirst({
-      where: { name: req.params.author }
-    });
+    const authorName = req.params.author.toLowerCase();
+    const author = await authors.fetch(authorName);
 
     if (!author)
       res.status(404).json(errorBody("Author does not exist."));
@@ -30,18 +31,13 @@ router.get("/packages/:author", async (req, res) => {
 
 // Add author
 router.post("/packages", async (req, res) => {
-  const authorName = req.body.authorName.toLowerCase()
-  const author = await prisma.author.findFirst({
-    where: { name: authorName }
-  });
+  if (!assertBodyField(req, res, "authorName")) return;
+
+  const authorName: string = req.body.authorName.toLowerCase()
+  const author = await authors.fetch(authorName);
 
   if (!author) {
-    await prisma.author.create({
-      data: {
-        name: authorName
-      }
-    });
-
+    await authors.create(authorName);
     res.json({ success: true });
   } else
     res.status(503).json(errorBody("Author already exists."));
@@ -49,40 +45,32 @@ router.post("/packages", async (req, res) => {
 
 // Delete author
 router.delete("/packages", async (req, res) => {
-  const authorName = req.body.authorName.toLowerCase()
-  const author = await prisma.author.findFirst({
-    where: { name: authorName }
-  });
+  if (!assertBodyField(req, res, "authorName")) return;
+
+  const authorName: string = req.body.authorName.toLowerCase()
+  const author = await authors.fetch(authorName);
 
   if (author) {
-    await prisma.author.delete({
-      where: { name: authorName }
-    });
-
+    await authors.delete(authorName);
     res.json({ success: true });
   } else
     res.status(404).json(errorBody("Author does not exist."));
 });
 
-// Get package
+// Fetch package
 router.get("/packages/:author/:name", async (req, res) => {
   try {
-    const author = await prisma.author.findFirst({
-      where: { name: req.params.author.toLowerCase() }
-    });
+    const authorName = req.params.author.toLowerCase();
 
-    if (!author)
-      res.status(404).json(errorBody("Author does not exist."));
-    else {
-      const packageData = await prisma.package.findFirst({
-        where: { author: author }
-      });
+    if (await authors.exists(authorName)) {
+      const pkg = await packages.fetch(authorName, req.params.name)
 
-      if (!packageData)
+      if (!pkg)
         res.status(404).json(errorBody("Package does not exist."));
       else
-        res.json({ success: true, result: packageData });
-    }
+        res.json({ success: true, result: pkg });
+    } else
+      res.status(404).json(errorBody("Author does not exist."));
   } catch (err) {
     console.error(err);
     res.status(500).json(errorBody("Failed to fetch package."));
@@ -91,17 +79,16 @@ router.get("/packages/:author/:name", async (req, res) => {
 
 // Add package
 router.post("/packages/:author",  async (req, res) => {
+  if (!assertBodyField(req, res, "packageName")) return;
+  if (!assertBodyField(req, res, "repository")) return;
+
   const packageName: string = req.body.packageName.toLowerCase();
   const repository: string = req.body.repository;
-  const author = await prisma.author.findFirst({
-    where: { name: req.params.author.toLowerCase() }
-  });
+  const authorName = req.params.author.toLowerCase();
 
-  if (!author)
-    res.status(404).json(errorBody("Author does not exist."));
-  else {
+  if (await authors.exists(authorName))
     try {
-      await packages.create(author, packageName, repository);
+      await packages.create(authorName, packageName, repository);
       res.json({ success: true });
     } catch (err) {
       if (err instanceof PackageAlreadyExistsError)
@@ -111,32 +98,27 @@ router.post("/packages/:author",  async (req, res) => {
         res.status(500).json(errorBody("Failed to fetch package."));
       }
     }
-  }
+  else
+    res.status(404).json(errorBody("Author does not exist."));
 });
 
 // Delete a package
 router.delete("/packages/:author", async (req, res) => {
-  const packageName = req.body.name.toLowerCase();
-  const author = await prisma.author.findFirst({
-    where: { name: req.params.author.toLowerCase() }
-  });
+  if (!assertBodyField(req, res, "packageName")) return;
 
-  if (!author)
-    res.status(404).json(errorBody("Author does not exist."));
-  else {
-    const packageData = await prisma.package.findFirst({
-      where: { author: author }
-    });
+  const packageName = req.body.packageName.toLowerCase();
+  const authorName = req.params.author.toLowerCase();
 
-    if (packageData) {
-      await prisma.package.delete({
-        where: { name: packageName }
-      });
+  if (await authors.exists(authorName)) {
+    const pkg = await packages.fetch(authorName, packageName);
 
+    if (pkg) {
+      await packages.delete(authorName, packageName);
       res.json({ success: true });
     } else
       res.status(503).json(errorBody("Package does not exist."));
-  }
+  } else
+    res.status(404).json(errorBody("Author does not exist."));
 });
 
 app.use("/api", router);
