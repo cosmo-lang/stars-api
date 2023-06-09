@@ -16,7 +16,7 @@ model Package {
 }
 
 model Author {
-  id    String        @id @default(auto()) @map("_id") @db.ObjectId
-  name  String        @unique
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  name     String     @unique
   packages Package[]
 }
