@@ -1,6 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import express from "express";
-import { ObjectId } from "mongodb";
 
 const prisma = new PrismaClient;
 const app = express();
@@ -15,7 +14,7 @@ router.get("/packages/:author", async (req, res) => {
       where: { name: req.params.author }
     });
 
-    if (author == null)
+    if (!author)
       res.status(404).json({ success: false, error: "Author does not exist." });
     else {
       const packages = await prisma.package.findMany({
@@ -35,10 +34,9 @@ router.post("/packages", async (req, res) => {
     where: { name: authorName }
   });
 
-  if (author == null) {
+  if (!author) {
     await prisma.author.create({
       data: {
-        id: new ObjectId().toHexString(),
         name: authorName,
         packages: {
           create: []
@@ -57,7 +55,7 @@ router.delete("/packages", async (req, res) => {
     where: { name: authorName }
   });
 
-  if (author != null) {
+  if (author) {
     await prisma.author.delete({
       where: { name: authorName }
     });
@@ -73,14 +71,14 @@ router.get("/packages/:author/:name", async (req, res) => {
       where: { name: req.params.author.toLowerCase() }
     });
 
-    if (author == null)
+    if (!author)
       res.status(404).json({ success: false, error: "Author does not exist." });
     else {
       const packageData = await prisma.package.findFirst({
         where: { author: author }
       });
 
-      if (packageData == null)
+      if (!packageData)
         res.status(404).json({ success: false, error: "Package does not exist." });
       else
         res.json({ success: true, result: packageData });
@@ -91,28 +89,32 @@ router.get("/packages/:author/:name", async (req, res) => {
   }
 });
 
+// Add package
 router.post("/packages/:author",  async (req, res) => {
-  const packageName = req.body.name
+  const packageName = req.body.packageName.toLowerCase();
+  const repository = req.body.repository;
   const author = await prisma.author.findFirst({
     where: { name: req.params.author.toLowerCase() }
   });
 
-  if (author == null)
+  if (!author)
     res.status(404).json({ success: false, error: "Author does not exist." });
   else {
     const packageData = await prisma.package.findFirst({
       where: { author: author }
     });
 
-    if (packageData == null) {
+    if (!packageData) {
       await prisma.package.create({
         data: {
-          id: new ObjectId().toHexString(),
           name: packageName,
+          repository: repository,
           author: {
-            create: author
+            connect: {
+              id: author.id
+            }
           }
-        }
+        },
       });
 
       res.json({ success: true });
@@ -122,19 +124,19 @@ router.post("/packages/:author",  async (req, res) => {
 });
 
 router.delete("/packages/:author", async (req, res) => {
-  const packageName = req.body.name
+  const packageName = req.body.name.toLowerCase();
   const author = await prisma.author.findFirst({
     where: { name: req.params.author.toLowerCase() }
   });
 
-  if (author == null)
+  if (!author)
     res.status(404).json({ success: false, error: "Author does not exist." });
   else {
     const packageData = await prisma.package.findFirst({
       where: { author: author }
     });
 
-    if (packageData != null) {
+    if (packageData) {
       await prisma.package.delete({
         where: { name: packageName }
       });
