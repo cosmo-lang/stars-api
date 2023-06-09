@@ -20,15 +20,11 @@ router.get("/packages/:author", async (req, res) => {
 
     if (!author)
       res.status(404).json(errorBody("Author does not exist."));
-    else {
-      const packages = await prisma.package.findMany({
-        where: { author: author }
-      })
-      res.json({ success: true, result: packages });
-    }
+    else
+      res.json({ success: true, result: author });
   } catch (err) {
     console.error(err);
-    res.status(500).json(errorBody("Failed to fetch package."));
+    res.status(500).json(errorBody("Failed to fetch author."));
   }
 });
 
