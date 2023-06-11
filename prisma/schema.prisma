@@ -12,7 +12,7 @@ model Package {
   name         String   @unique
   fullName     String   @unique
   repository   String   @unique
-  timeCreated  Int
+  timeCreated  Float
   author       Author   @relation(fields: [authorId, authorName], references: [id, name])
   authorName   String   @unique
   authorId     String   @unique @db.ObjectId
@@ -25,7 +25,7 @@ model Author {
   name         String   @unique
   email        String   @unique
   passwordHash String   @unique
-  timeCreated  Int
+  timeCreated  Float
   packages     Package[]
 }
 
@@ -33,5 +33,5 @@ model AuthenticationToken {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   authorId     String   @unique @db.ObjectId
   token        String   @unique
-  timeExpires  Int
+  timeExpires  Float
 }

@@ -44,11 +44,11 @@ export default class PackageRouter implements BaseRouter {
       if (!assertBodyField(req, res, "authorPassword")) return;
       if (!assertBodyField(req, res, "repository")) return;
 
+      const authorName = req.params.author.toLowerCase();
       const packageName: string = req.body.packageName.toLowerCase();
       const repository: string = req.body.repository;
       const authorPassword: string = req.body.authorPassword;
       const token: string = req.body.authenticationToken;
-      const authorName = req.params.author.toLowerCase();
 
       if (await this.authors.exists(authorName))
         try {
