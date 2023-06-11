@@ -26,15 +26,13 @@ export class AuthorService {
   }
 
   public async create(name: string, email: string, password: string): Promise<void> {
-    const passwordSalt = crypto.randomBytes(24).toString("hex");
-    const passwordHash = await bcrypt.hash(password, passwordSalt);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     await this.prisma.author.create({
       data: {
         name,
         email,
         passwordHash,
-        passwordSalt,
         packages: { create: [] }
       }
     });
@@ -65,11 +63,11 @@ export class AuthorService {
   }
 
   public async delete(name: string): Promise<void> {
-    await this.prisma.author.delete({
-      where: { name }
-    });
     await this.prisma.package.deleteMany({
       where: { author: { name } }
+    });
+    await this.prisma.author.delete({
+      where: { name }
     });
   }
 }

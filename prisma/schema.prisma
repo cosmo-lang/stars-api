@@ -16,10 +16,9 @@ model Package {
 }
 
 model Author {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  name         String     @unique
-  email        String     @unique
-  passwordHash String     @unique
-  passwordSalt String     @unique
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String   @unique
+  email        String   @unique
+  passwordHash String   @unique
   packages     Package[]
 }
