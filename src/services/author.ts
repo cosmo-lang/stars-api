@@ -1,5 +1,6 @@
 import { Author, Package, Prisma, PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt"
+import crypto from "crypto";
 
 export class AuthorService {
   public constructor(
@@ -25,13 +26,15 @@ export class AuthorService {
   }
 
   public async create(name: string, email: string, password: string): Promise<void> {
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordSalt = crypto.randomBytes(24).toString("hex");
+    const passwordHash = await bcrypt.hash(password, passwordSalt);
 
     await this.prisma.author.create({
       data: {
         name,
         email,
         passwordHash,
+        passwordSalt,
         packages: { create: [] }
       }
     });
