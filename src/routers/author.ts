@@ -17,7 +17,7 @@ export default class AuthorRouter implements BaseRouter {
         const author = await this.authors.fetch(authorName);
 
         if (!author)
-        res.status(404).json(errorBody("Author does not exist."));
+          res.status(404).json(errorBody("Author does not exist."));
         else {
           author.passwordHash = "(hidden)";
           res.status(200).json({ success: true, result: author });

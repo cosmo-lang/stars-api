@@ -1,11 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import { AuthorService } from "./services/author";
 import { PackageService } from "./services/package";
+import AuthenticationService from "./services/authentication";
+
 import AuthorRouter from "./routers/author";
 import PackageRouter from "./routers/package";
+import AuthenticationRouter from "./routers/authentication";
 import BaseRouter from "./routers/base-router";
 import express from "express";
-import AuthenticationService from "./services/authentication";
 
 const prisma = new PrismaClient;
 const auth = new AuthenticationService(prisma);
@@ -17,9 +19,11 @@ const port = 3030;
 app.use(express.json());
 const router = express.Router();
 
-const routers: BaseRouter[] = [];
-routers.push(new AuthorRouter(authors, router));
-routers.push(new PackageRouter(authors, packages, router));
+const routers: BaseRouter[] = [
+  new AuthenticationRouter(auth, authors, router),
+  new AuthorRouter(authors, router),
+  new PackageRouter(authors, packages, router)
+];
 
 for (const router of routers)
   router.route();
