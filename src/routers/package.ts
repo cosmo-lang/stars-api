@@ -54,9 +54,9 @@ export default class PackageRouter implements BaseRouter {
           res.json({ success: true });
         } catch (err) {
           if (err instanceof PackageAlreadyExistsError)
-            res.status(503).json(errorBody("Package already exists."));
+            res.status(403).json(errorBody("Package already exists."));
           if (err instanceof AuthorAuthenticationFailedError)
-            res.status(503).json(errorBody("Failed to authenticate."));
+            res.status(401).json(errorBody("Failed to authenticate."));
           else {
             console.error(err);
             res.status(500).json(errorBody("Failed to fetch package."));
@@ -80,7 +80,7 @@ export default class PackageRouter implements BaseRouter {
           await this.packages.delete(authorName, packageName);
           res.json({ success: true });
         } else
-          res.status(503).json(errorBody("Package does not exist."));
+          res.status(403).json(errorBody("Package does not exist."));
       } else
         res.status(404).json(errorBody("Author does not exist."));
     });

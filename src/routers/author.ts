@@ -41,7 +41,7 @@ export default class AuthorRouter implements BaseRouter {
         await this.authors.create(authorName, email, password);
         res.json({ success: true });
       } else
-        res.status(503).json(errorBody("Author already exists."));
+        res.status(403).json(errorBody("Author already exists."));
     });
 
     // Delete author
