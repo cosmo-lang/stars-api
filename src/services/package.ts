@@ -1,6 +1,6 @@
 import { Package, PrismaClient } from "@prisma/client";
 import { AuthorService } from "./author";
-import * as bcrypt from "bcrypt";
+import AuthenticationService from "./authentication";
 
 export class PackageAlreadyExistsError extends Error {}
 export class AuthorAuthenticationFailedError extends Error {}
@@ -8,14 +8,15 @@ export class AuthorAuthenticationFailedError extends Error {}
 export class PackageService {
   public constructor(
     private readonly prisma: PrismaClient,
-    private readonly authors: AuthorService
+    private readonly authors: AuthorService,
+    private readonly auth: AuthenticationService
   ) {}
 
   public async fetch(authorName: string, name: string): Promise<Package | null> {
     const author = await this.authors.fetch(authorName);
     if (!author) return null;
 
-    return this.prisma.package.findFirst({
+    return this.prisma.package.findUnique({
       where: {
         name: name,
         authorId: author.id
@@ -23,23 +24,35 @@ export class PackageService {
     });
   }
 
-  public async create(authorName: string, authorPassword: string, name: string, repository: string): Promise<void> {
+  public async create(
+    authorName: string,
+    authorPassword: string,
+    name: string,
+    repository: string,
+    token: string
+  ): Promise<void> {
+
     const packageData = await this.fetch(authorName, name);
     if (packageData)
       throw new PackageAlreadyExistsError;
 
-    const author = await this.authors.fetch(authorName);
-    if (author && !bcrypt.compareSync(authorPassword, author.passwordHash))
+    const passwordMatches = await this.authors.isAuthenticated(authorName, authorPassword);
+    if (!passwordMatches || !await this.auth.verify(token))
       throw new AuthorAuthenticationFailedError;
 
+    const author = (await this.authors.fetch(authorName))!
     await this.authors.update(authorName, [
       await this.prisma.package.create({
         data: {
           name: name,
+          fullName: author.name + "/" + name,
           repository: repository,
           timeCreated: Date.now() / 1000,
           author: {
-            connect: { id: (await this.authors.fetch(authorName))!.id }
+            connect: {
+              id: author.id,
+              name: author.name
+            }
           }
         },
       })

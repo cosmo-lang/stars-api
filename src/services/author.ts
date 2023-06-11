@@ -1,10 +1,11 @@
 import { Author, Package, Prisma, PrismaClient } from "@prisma/client";
+import AuthenticationService from "./authentication";
 import * as bcrypt from "bcrypt"
-import crypto from "crypto";
 
 export class AuthorService {
   public constructor(
-    private readonly prisma: PrismaClient
+    private readonly prisma: PrismaClient,
+    private readonly auth: AuthenticationService
   ) {}
 
   public async exists(name: string): Promise<boolean> {
@@ -12,17 +13,17 @@ export class AuthorService {
   }
 
   public fetch(name: string): Prisma.Prisma__AuthorClient<Author | null, null> {
-    return this.prisma.author.findFirst({
+    return this.prisma.author.findUnique({
       where: { name },
       include: { packages: true }
     })
   }
 
-  // Returns false if the author does not exist
   public async isAuthenticated(name: string, password: string): Promise<boolean> {
     const author = await this.fetch(name);
     if (!author) return false;
-    return bcrypt.compare(password, author.passwordHash);
+    if (!bcrypt.compareSync(password, author.passwordHash)) return false;
+    return true;
   }
 
   public async create(name: string, email: string, password: string): Promise<void> {

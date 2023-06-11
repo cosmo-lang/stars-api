@@ -40,17 +40,19 @@ export default class PackageRouter implements BaseRouter {
     // Add package
     this.router.post("/:author",  async (req, res) => {
       if (!assertBodyField(req, res, "packageName")) return;
+      if (!assertBodyField(req, res, "authenticationToken")) return;
       if (!assertBodyField(req, res, "authorPassword")) return;
       if (!assertBodyField(req, res, "repository")) return;
 
       const packageName: string = req.body.packageName.toLowerCase();
       const repository: string = req.body.repository;
       const authorPassword: string = req.body.authorPassword;
+      const token: string = req.body.authenticationToken;
       const authorName = req.params.author.toLowerCase();
 
       if (await this.authors.exists(authorName))
         try {
-          await this.packages.create(authorName, authorPassword, packageName, repository);
+          await this.packages.create(authorName, authorPassword, packageName, repository, token);
           res.status(200).json({ success: true });
         } catch (err) {
           if (err instanceof PackageAlreadyExistsError)
@@ -69,8 +71,10 @@ export default class PackageRouter implements BaseRouter {
     // Delete a package
     this.router.delete("/:author", async (req, res) => {
       if (!assertBodyField(req, res, "packageName")) return;
+      if (!assertBodyField(req, res, "authenticationToken")) return;
 
-      const packageName = req.body.packageName.toLowerCase();
+      const packageName: string = req.body.packageName.toLowerCase();
+      const token: string = req.body.authenticationToken;
       const authorName = req.params.author.toLowerCase();
 
       if (await this.authors.exists(authorName)) {

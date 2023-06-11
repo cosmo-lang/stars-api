@@ -10,17 +10,28 @@ datasource db {
 model Package {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   name         String   @unique
+  fullName     String   @unique
   repository   String   @unique
   timeCreated  Int
-  author       Author   @relation(fields: [authorId], references: [id])
+  author       Author   @relation(fields: [authorId, authorName], references: [id, name])
+  authorName   String   @unique
   authorId     String   @unique @db.ObjectId
 }
 
 model Author {
+  @@unique([id, name])
+
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   name         String   @unique
   email        String   @unique
-  timeCreated  Int
   passwordHash String   @unique
+  timeCreated  Int
   packages     Package[]
+}
+
+model AuthenticationToken {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId     String   @unique @db.ObjectId
+  token        String   @unique
+  timeExpires  Int
 }

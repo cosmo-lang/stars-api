@@ -5,10 +5,12 @@ import AuthorRouter from "./routers/author";
 import PackageRouter from "./routers/package";
 import BaseRouter from "./routers/base-router";
 import express from "express";
+import AuthenticationService from "./services/authentication";
 
 const prisma = new PrismaClient;
-const authors = new AuthorService(prisma);
-const packages = new PackageService(prisma, authors);
+const auth = new AuthenticationService(prisma);
+const authors = new AuthorService(prisma, auth);
+const packages = new PackageService(prisma, authors, auth);
 const app = express();
 const port = 3030;
 
