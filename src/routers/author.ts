@@ -19,7 +19,7 @@ export default class AuthorRouter implements BaseRouter {
         if (!author)
           res.status(404).json(errorBody("Author does not exist."));
         else
-          res.json({ success: true, result: author });
+          res.status(200).json({ success: true, result: author });
       } catch (err) {
         console.error(err);
         res.status(500).json(errorBody("Failed to fetch author."));
@@ -39,7 +39,7 @@ export default class AuthorRouter implements BaseRouter {
 
       if (!author) {
         await this.authors.create(authorName, email, password);
-        res.json({ success: true });
+        res.status(200).json({ success: true });
       } else
         res.status(403).json(errorBody("Author already exists."));
     });
@@ -53,7 +53,7 @@ export default class AuthorRouter implements BaseRouter {
 
       if (author) {
         await this.authors.delete(authorName);
-        res.json({ success: true });
+        res.status(200).json({ success: true });
       } else
         res.status(404).json(errorBody("Author does not exist."));
     });

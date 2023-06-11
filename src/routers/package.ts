@@ -28,7 +28,7 @@ export default class PackageRouter implements BaseRouter {
           if (!pkg)
             res.status(404).json(errorBody("Package does not exist."));
           else
-            res.json({ success: true, result: pkg });
+            res.status(200).json({ success: true, result: pkg });
         } else
           res.status(404).json(errorBody("Author does not exist."));
       } catch (err) {
@@ -51,7 +51,7 @@ export default class PackageRouter implements BaseRouter {
       if (await this.authors.exists(authorName))
         try {
           await this.packages.create(authorName, authorPassword, packageName, repository);
-          res.json({ success: true });
+          res.status(200).json({ success: true });
         } catch (err) {
           if (err instanceof PackageAlreadyExistsError)
             res.status(403).json(errorBody("Package already exists."));
@@ -78,7 +78,7 @@ export default class PackageRouter implements BaseRouter {
 
         if (pkg) {
           await this.packages.delete(authorName, packageName);
-          res.json({ success: true });
+          res.status(200).json({ success: true });
         } else
           res.status(403).json(errorBody("Package does not exist."));
       } else
