@@ -68,5 +68,8 @@ export class AuthorService {
     await this.prisma.author.delete({
       where: { name }
     });
+    await this.prisma.package.deleteMany({
+      where: { author: { name } }
+    });
   }
 }
