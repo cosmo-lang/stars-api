@@ -7,7 +7,7 @@ export function errorBody(message: string): { success: boolean; error: string; }
 export function assertBodyField(req: Request, res: Response, fieldName: string): boolean {
   const fieldExists = req.body[fieldName];
   if (!fieldExists)
-    res.status(500).json(errorBody(`No "${fieldName}" field provided in body.`));
+    res.status(400).json(errorBody(`No "${fieldName}" field provided in body.`));
 
   return fieldExists;
 }
