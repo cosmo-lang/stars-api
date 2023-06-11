@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
+    "db": "mongod --dbpath db/ --bind_ip 127.0.0.1 --replSet packagesReplSet",
     "dev": "nodemon --exec \"prisma generate && tsc && node dist/main.js || exit 1\" --ext ts,prisma"
   },
   "repository": {
@@ -14,7 +15,7 @@
     "cosmo",
     "stars",
     "api",
-    "host",
+    "registry",
     "package",
     "manager"
   ],
