@@ -1,7 +1,9 @@
 import { Package, PrismaClient } from "@prisma/client";
 import { AuthorService } from "./author";
+import * as bcrypt from "bcrypt";
 
 export class PackageAlreadyExistsError extends Error {}
+export class AuthorAuthenticationFailedError extends Error {}
 
 export class PackageService {
   public constructor(
@@ -21,10 +23,14 @@ export class PackageService {
     });
   }
 
-  public async create(authorName: string, name: string, repository: string): Promise<void> {
+  public async create(authorName: string, authorPassword: string, name: string, repository: string): Promise<void> {
     const packageData = await this.fetch(authorName, name);
     if (packageData)
       throw new PackageAlreadyExistsError;
+
+    const author = await this.authors.fetch(authorName);
+    if (author && !bcrypt.compareSync(authorPassword, author.passwordHash))
+      throw new AuthorAuthenticationFailedError;
 
     await this.authors.update(authorName, [
       await this.prisma.package.create({

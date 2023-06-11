@@ -33,8 +33,8 @@ export default class AuthorRouter implements BaseRouter {
       if (!assertBodyField(req, res, "password")) return;
 
       const authorName: string = req.body.authorName.toLowerCase()
-      const email: string = req.body.email.toLowerCase()
-      const password: string = req.body.password.toLowerCase()
+      const email: string = req.body.email
+      const password: string = req.body.password
       const author = await this.authors.fetch(authorName);
 
       if (!author) {
