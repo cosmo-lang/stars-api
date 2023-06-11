@@ -37,6 +37,7 @@ export class PackageService {
         data: {
           name: name,
           repository: repository,
+          timeCreated: Date.now() / 1000,
           author: {
             connect: { id: (await this.authors.fetch(authorName))!.id }
           }

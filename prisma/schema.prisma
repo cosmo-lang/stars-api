@@ -8,17 +8,19 @@ datasource db {
 }
 
 model Package {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  name       String   @unique
-  repository String   @unique
-  author     Author   @relation(fields: [authorId], references: [id])
-  authorId   String   @unique @db.ObjectId
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String   @unique
+  repository   String   @unique
+  timeCreated  Int
+  author       Author   @relation(fields: [authorId], references: [id])
+  authorId     String   @unique @db.ObjectId
 }
 
 model Author {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   name         String   @unique
   email        String   @unique
+  timeCreated  Int
   passwordHash String   @unique
   packages     Package[]
 }

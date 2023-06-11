@@ -33,6 +33,7 @@ export class AuthorService {
         name,
         email,
         passwordHash,
+        timeCreated: Date.now() / 1000,
         packages: { create: [] }
       }
     });
