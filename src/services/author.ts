@@ -1,4 +1,5 @@
 import { Author, Package, Prisma, PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcrypt"
 
 export class AuthorService {
   public constructor(
@@ -11,23 +12,34 @@ export class AuthorService {
 
   public fetch(name: string): Prisma.Prisma__AuthorClient<Author | null, null> {
     return this.prisma.author.findFirst({
-      where: { name: name },
+      where: { name },
       include: { packages: true }
     })
   }
 
-  public async create(name: string): Promise<void> {
+  // Returns false if the author does not exist
+  public async isAuthenticated(name: string, password: string): Promise<boolean> {
+    const author = await this.fetch(name);
+    if (!author) return false;
+    return bcrypt.compare(password, author.passwordHash);
+  }
+
+  public async create(name: string, email: string, password: string): Promise<void> {
+    const passwordHash = await bcrypt.hash(password, 10);
+
     await this.prisma.author.create({
       data: {
-        name: name,
+        name,
+        email,
+        passwordHash,
         packages: { create: [] }
       }
     });
   }
 
   /**
-   * Warning: An author with the name `name` must exist
-   * to call this method.
+   * Warning: An author with the name `name` must
+   * exist to call this method.
    */
   public async update(name: string, newPackages: Package[]): Promise<void> {
     const authorPromise = this.fetch(name);
@@ -51,7 +63,7 @@ export class AuthorService {
 
   public async delete(name: string): Promise<void> {
     await this.prisma.author.delete({
-      where: { name: name }
+      where: { name }
     });
   }
 }
