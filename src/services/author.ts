@@ -12,15 +12,22 @@ export class AuthorService {
     return !!(await this.fetch(name));
   }
 
-  public fetch(name: string): Prisma.Prisma__AuthorClient<Author | null, null> {
+  public fetch(name: string, exposePassword = false): Prisma.Prisma__AuthorClient<Author | null, null> {
     return this.prisma.author.findUnique({
       where: { name },
-      include: { packages: true }
-    })
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        passwordHash: exposePassword,
+        packages: true,
+        timeCreated: true
+      }
+    });
   }
 
   public async isAuthenticated(name: string, password: string): Promise<boolean> {
-    const author = await this.fetch(name);
+    const author = await this.fetch(name, true);
     if (!author) return false;
     if (!bcrypt.compareSync(password, author.passwordHash)) return false;
     return true;

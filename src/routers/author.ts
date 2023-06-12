@@ -14,12 +14,12 @@ export default class AuthorRouter implements BaseRouter {
     this.router.get("/:author", async (req, res) => {
       try {
         const authorName = req.params.author.toLowerCase();
-        const author = await this.authors.fetch(authorName);
+        const exposePassword = req.body.exposePassword == "true"
+        const author = await this.authors.fetch(authorName, exposePassword);
 
         if (!author)
           res.status(404).json(errorBody("Author does not exist."));
         else {
-          author.passwordHash = "(hidden)";
           res.status(200).json({ success: true, result: author });
         }
       } catch (err) {
