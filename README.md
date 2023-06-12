@@ -11,3 +11,6 @@ API for hosting Stars packages
 | `/api/packages/:author/`      | POST        | Upload a package         |
 | `/api/packages/:author/`      | PATCH         | Update a package         |
 | `/api/packages/:author/`      | DELETE      | Remove a package         |
+
+# Todo
+- `PATCH` endpoints
