@@ -61,7 +61,7 @@ export default class PackageRouter implements BaseRouter {
             res.status(401).json(errorBody("Failed to authenticate."));
           else {
             console.error(err);
-            res.status(500).json(errorBody("Failed to fetch package."));
+            res.status(500).json(errorBody("Failed to create package."));
           }
         }
       else

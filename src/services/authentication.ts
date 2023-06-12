@@ -23,7 +23,7 @@ export default class AuthenticationService {
 
   public async verify(token: string): Promise<boolean> {
     const tokenData = await this.prisma.authenticationToken.findUnique({
-      where: { id: token }
+      where: { token }
     });
 
     if (!tokenData || tokenData.timeExpires < (Date.now() / 1000))

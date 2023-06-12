@@ -16,9 +16,9 @@ export class PackageService {
     const author = await this.authors.fetch(authorName);
     if (!author) return null;
 
-    return this.prisma.package.findUnique({
+    return this.prisma.package.findFirst({
       where: {
-        name: name,
+        name,
         authorId: author.id
       }
     });
@@ -49,10 +49,7 @@ export class PackageService {
           repository: repository,
           timeCreated: Date.now() / 1000,
           author: {
-            connect: {
-              id: author.id,
-              name: author.name
-            }
+            connect: { id: author.id }
           }
         },
       })
