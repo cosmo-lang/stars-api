@@ -4,6 +4,8 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
+    "start": "npm run db -s && npm run build && node dist/main.js",
+    "build": "tsc",
     "db:test": "mongod --dbpath db/ --bind_ip 127.0.0.1 --replSet packagesReplSetTest1",
     "db": "mongod --dbpath db/ --bind_ip 127.0.0.1 --replSet packagesReplSet",
     "dev": "nodemon --exec \"prisma generate && tsc && node dist/main.js || exit 1\" --ext ts,prisma"
